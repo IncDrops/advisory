@@ -4,7 +4,7 @@
  *
  * - provideAdviceBasedOnPersona - A function that handles the advice providing process.
  * - ProvideAdviceBasedOnPersonaInput - The input type for the provideAdviceBasedOnPersona function.
- * - ProvideAdviceBasedOnPersonaOutput - The return type for the provideAdviceBasedOnPersona function.
+ * - ProvideAdviceBasedOnnaOutput - The return type for the provideAdviceBasedOnPersona function.
  */
 
 import {ai} from '@/ai/genkit';
