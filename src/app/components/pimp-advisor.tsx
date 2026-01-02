@@ -91,7 +91,7 @@ function PimpAdvisorContent() {
       if (result.error) {
         throw new Error(result.error.message);
       }
-      setResponse(result.advice || null);
+      setResponse(result.advice?.answer || "Sorry, I couldn't get any advice at the moment.");
       setQuestion('');
     } catch (error) {
       console.error(error);
