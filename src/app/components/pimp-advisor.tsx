@@ -185,6 +185,7 @@ function PimpAdvisorContent() {
                 placeholder={richMode ? "Ask about luxury, investments, or the finer things..." : "Ask about budget hacks, hustles, or making it work..."}
                 className="w-full bg-transparent text-white placeholder-white/40 resize-none focus:outline-none text-lg p-2 border-none focus-visible:ring-0 focus-visible:ring-offset-0 min-h-[80px]"
                 rows={3}
+                maxLength={1000}
               />
               <div className="flex items-center justify-between mt-4 pt-4 border-t border-white/10">
                 <div className="flex items-center gap-2 text-white/60">
