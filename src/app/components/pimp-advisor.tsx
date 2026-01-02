@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -148,9 +149,15 @@ export function PimpAdvisor() {
                   Ask <Send className="w-4 h-4" />
                 </Button>
               </div>
-              <p className="text-xs text-white/40 mt-3 text-center">
-                This service is for entertainment and informational purposes only. Responses are AI-generated and should not be considered professional financial, legal, or medical advice. Consult appropriate professionals for serious decisions.
-              </p>
+              <div className="text-xs text-white/40 mt-3 text-center">
+                <p className="mb-2">
+                  This service is for entertainment and informational purposes only. Responses are AI-generated and should not be considered professional financial, legal, or medical advice. Consult appropriate professionals for serious decisions.
+                </p>
+                <Link href="/privacy-and-terms" className="underline hover:text-white">Privacy Policy & Terms of Use</Link>
+                <p className="mt-2">
+                  © 2026 Rich Pimp Poor Pimp. All rights reserved. A service of IncDrops.
+                </p>
+              </div>
             </div>
           </div>
         </div>
@@ -168,7 +175,7 @@ export function PimpAdvisor() {
             <span className="text-2xl font-bold text-white">$1.00</span>
           </div>
           <p className="text-white/60 text-sm mb-6">
-            A payment of $1.00 will be processed to continue.
+            A payment of $1.00 will be processed to continue. By clicking "Pay & Ask", you acknowledge that you have read, understood, and agree to be bound by our Privacy Policy and Terms of Use.
           </p>
           <DialogFooter className="flex-row gap-3 !justify-between">
             <Button onClick={() => setIsModalOpen(false)} className="flex-1 px-4 py-3 h-auto bg-white/10 text-white hover:bg-white/20 transition-colors font-medium">

@@ -29,9 +29,9 @@ const prompt = ai.definePrompt({
   name: 'provideAdviceBasedOnPersonaPrompt',
   input: {schema: ProvideAdviceBasedOnPersonaInputSchema},
   output: {format: 'text'},
-  prompt: `{{#if (eq pimp \"rich\")}}You are the Rich Pimp - a luxury lifestyle advisor. You speak with confidence about high-end brands, luxury experiences, and premium solutions. You assume money is less of a concern and focus on quality, status, and the finer things. Keep responses under 150 words, conversational but sophisticated. Use some slang but stay classy.{{else}}You are the Poor Pimp - a street-smart consultant who maximizes value on a budget. You\'re resourceful, clever, and know all the hacks. You help people look good and live well without breaking the bank. Keep responses under 150 words, conversational and real. Use some slang but stay helpful.{{/if}}\n\nQuestion: {{{question}}}`,
+  prompt: `{{#if (eq pimp "rich")}}You are the Rich Pimp - a luxury lifestyle advisor. You speak with confidence about high-end brands, luxury experiences, and premium solutions. You assume money is less of a concern and focus on quality, status, and the finer things. Keep responses under 150 words, conversational but sophisticated. Use some slang but stay classy.{{else}}You are the Poor Pimp - a street-smart consultant who maximizes value on a budget. You're resourceful, clever, and know all the hacks. You help people look good and live well without breaking the bank. Keep responses under 150 words, conversational and real. Use some slang but stay helpful.{{/if}}\n\nQuestion: {{{question}}}`,
   config: {
-    model: 'googleai/gemini-2.5-flash',
+    model: 'googleai/gemini-1.5-flash-latest',
     maxOutputTokens: 800,
   },
 });
@@ -54,3 +54,5 @@ const provideAdviceBasedOnPersonaFlow = ai.defineFlow(
     }
   }
 );
+
+    
