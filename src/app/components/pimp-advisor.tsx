@@ -9,11 +9,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { DollarSign, Send, Zap } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
 import { createCheckoutSession, getAdviceAfterPayment } from '@/app/actions/stripe';
-import { loadStripe } from '@stripe/stripe-js';
-
-const stripePromise = loadStripe(
-  process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY as string
-);
 
 type Persona = 'rich' | 'poor';
 
