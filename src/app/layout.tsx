@@ -5,6 +5,9 @@ import './globals.css';
 export const metadata: Metadata = {
   title: 'PimpAdvisor',
   description: 'AI-Powered Advice from Two Perspectives',
+  icons: {
+    icon: '/icon.svg',
+  }
 };
 
 export default function RootLayout({
