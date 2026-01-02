@@ -1,6 +1,7 @@
 'use server';
 
 import Stripe from 'stripe';
+import { provideAdviceBasedOnPersona } from '@/ai/flows/provide-advice-based-on-persona';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string);
 
@@ -11,10 +12,7 @@ export async function createCheckoutSession(
 ) {
   try {
     const successUrl = new URL('/?session_id={CHECKOUT_SESSION_ID}', origin);
-    successUrl.searchParams.set('persona', persona);
-    successUrl.searchParams.set('question', question);
-    successUrl.searchParams.set('payment_success', 'true');
-
+    
     const cancelUrl = new URL(origin);
     cancelUrl.searchParams.set('payment_cancelled', 'true');
 
@@ -38,6 +36,10 @@ export async function createCheckoutSession(
       mode: 'payment',
       success_url: successUrl.toString(),
       cancel_url: cancelUrl.toString(),
+      metadata: {
+        persona,
+        question
+      }
     });
 
     if (!session.url) {
@@ -47,6 +49,31 @@ export async function createCheckoutSession(
     return { id: session.id, url: session.url };
   } catch (error) {
     console.error('Error creating Checkout Session:', error);
+    return { error: { message: (error as Error).message } };
+  }
+}
+
+export async function getAdviceAfterPayment(sessionId: string) {
+  try {
+    const session = await stripe.checkout.sessions.retrieve(sessionId);
+
+    if (session.payment_status !== 'paid') {
+      throw new Error('Payment not successful.');
+    }
+
+    const persona = session.metadata?.persona as 'rich' | 'poor';
+    const question = session.metadata?.question;
+
+    if (!persona || !question) {
+      throw new Error('Missing persona or question from session metadata.');
+    }
+
+    const advice = await provideAdviceBasedOnPersona({ question, pimp: persona });
+
+    return { advice };
+
+  } catch (error) {
+    console.error('Error getting advice after payment:', error);
     return { error: { message: (error as Error).message } };
   }
 }

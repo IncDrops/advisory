@@ -7,13 +7,10 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { DollarSign, Send, Zap } from 'lucide-react';
-import { provideAdviceBasedOnPersona } from '@/ai/flows/provide-advice-based-on-persona';
 import { useToast } from "@/hooks/use-toast";
-import { streamFlow } from '@genkit-ai/next/client';
-import { createCheckoutSession } from '@/app/actions/stripe';
+import { createCheckoutSession, getAdviceAfterPayment } from '@/app/actions/stripe';
 import { loadStripe } from '@stripe/stripe-js';
 
-// Even though we're not using Elements, we initialize stripe to get its instance
 const stripePromise = loadStripe(
   process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY as string
 );
@@ -37,21 +34,15 @@ function PimpAdvisorContent() {
   const router = useRouter();
 
   useEffect(() => {
-    const paymentSuccess = searchParams.get('payment_success') === 'true';
+    const sessionId = searchParams.get('session_id');
     const paymentCancelled = searchParams.get('payment_cancelled') === 'true';
-    const savedQuestion = searchParams.get('question');
-    const savedPersona = searchParams.get('persona') as Persona;
 
-    if (paymentSuccess && savedQuestion && savedPersona) {
-      setPersona(savedPersona);
-      handleSuccessfulPayment(savedQuestion, savedPersona);
+    if (sessionId) {
+      handleSuccessfulPayment(sessionId);
 
       // Clean up URL
       const newUrl = new URL(window.location.href);
-      newUrl.searchParams.delete('payment_success');
       newUrl.searchParams.delete('session_id');
-      newUrl.searchParams.delete('question');
-      newUrl.searchParams.delete('persona');
       router.replace(newUrl.toString());
     }
 
@@ -71,6 +62,7 @@ function PimpAdvisorContent() {
   const handleAsk = async () => {
     if (question.trim()) {
       setIsLoading(true);
+      setResponse(null);
       try {
         const res = await createCheckoutSession(persona, question, window.location.origin);
         if (res.url) {
@@ -90,22 +82,23 @@ function PimpAdvisorContent() {
     }
   };
 
-  const handleSuccessfulPayment = async (paidQuestion: string, paidPersona: Persona) => {
+  const handleSuccessfulPayment = async (sessionId: string) => {
     setIsLoading(true);
-    setResponse(''); // Clear previous response and prepare for streaming
+    setResponse('');
 
     try {
-      const stream = streamFlow(provideAdviceBasedOnPersona, { question: paidQuestion, pimp: paidPersona });
-      for await (const chunk of stream) {
-        setResponse(prev => (prev || '') + chunk);
+      const result = await getAdviceAfterPayment(sessionId);
+      if (result.error) {
+        throw new Error(result.error.message);
       }
+      setResponse(result.advice || null);
       setQuestion('');
     } catch (error) {
       console.error(error);
       toast({
         variant: "destructive",
         title: "An Error Occurred",
-        description: "Could not get advice. Please try again later.",
+        description: (error as Error).message || "Could not get advice. Please try again later.",
       });
     } finally {
       setIsLoading(false);
@@ -166,11 +159,8 @@ function PimpAdvisorContent() {
                       <div className={cn("w-2 h-2 rounded-full animate-pulse", richMode ? 'bg-amber-400' : 'bg-cyan-400')}></div>
                       <div className={cn("w-2 h-2 rounded-full animate-pulse-delay-75", richMode ? 'bg-amber-400' : 'bg-cyan-400')}></div>
                       <div className={cn("w-2 h-2 rounded-full animate-pulse-delay-150", richMode ? 'bg-amber-400' : 'bg-cyan-400')}></div>
-                      <p className="text-white/60 ml-2">Thinking...</p>
+                      <p className="text-white/60 ml-2">Getting advice...</p>
                     </div>
-                  )}
-                  {isLoading && response && (
-                    <span className={cn("inline-block w-2 h-5 bg-current ml-1 animate-pulse", richMode ? 'text-amber-400' : 'text-cyan-400')}></span>
                   )}
                 </div>
               </div>
