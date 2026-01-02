@@ -8,6 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Sparkles, Zap, DollarSign, Send, Bot } from 'lucide-react';
 import { provideAdviceBasedOnPersona } from '@/ai/flows/provide-advice-based-on-persona';
 import { useToast } from "@/hooks/use-toast";
+import { streamFlow } from '@genkit-ai/next/client';
 
 type Persona = 'rich' | 'poor';
 
@@ -35,11 +36,13 @@ export function PimpAdvisor() {
   const handlePayAndAsk = async () => {
     setIsModalOpen(false);
     setIsLoading(true);
-    setResponse(null);
+    setResponse(''); // Clear previous response and prepare for streaming
 
     try {
-      const result = await provideAdviceBasedOnPersona({ question, pimp: persona });
-      setResponse(result.answer);
+      const stream = streamFlow(provideAdviceBasedOnPersona, { question, pimp: persona });
+      for await (const chunk of stream) {
+        setResponse(prev => (prev || '') + chunk);
+      }
       setQuestion('');
     } catch (error) {
       console.error(error);
@@ -95,24 +98,26 @@ export function PimpAdvisor() {
         </div>
 
         <div className="flex-1 p-6 max-w-4xl w-full mx-auto flex flex-col">
-          {response && (
+          {(response || isLoading) && (
             <div className={cn("mb-6 p-6 rounded-lg backdrop-blur-md border transition-all duration-300", richMode ? 'bg-amber-950/30 border-amber-500/30' : 'bg-cyan-950/30 border-cyan-500/30')}>
               <div className="flex items-start gap-4">
                 <div className={cn("p-2 rounded-full flex-shrink-0", richMode ? 'bg-amber-500/20 text-amber-400' : 'bg-cyan-500/20 text-cyan-400')}>
                   {richMode ? <RichIcon /> : <PoorIcon />}
                 </div>
-                <p className="text-white text-lg leading-relaxed flex-1 pt-1">{response}</p>
-              </div>
-            </div>
-          )}
-
-          {isLoading && (
-            <div className="mb-6 p-6 rounded-lg backdrop-blur-md border bg-white/5 border-white/10">
-              <div className="flex items-center gap-3">
-                <div className={cn("w-2 h-2 rounded-full animate-pulse", richMode ? 'bg-amber-400' : 'bg-cyan-400')}></div>
-                <div className={cn("w-2 h-2 rounded-full animate-pulse-delay-75", richMode ? 'bg-amber-400' : 'bg-cyan-400')}></div>
-                <div className={cn("w-2 h-2 rounded-full animate-pulse-delay-150", richMode ? 'bg-amber-400' : 'bg-cyan-400')}></div>
-                <p className="text-white/60 ml-2">Thinking...</p>
+                <div className="text-white text-lg leading-relaxed flex-1 pt-1">
+                  {response}
+                  {isLoading && !response && (
+                    <div className="flex items-center gap-3">
+                      <div className={cn("w-2 h-2 rounded-full animate-pulse", richMode ? 'bg-amber-400' : 'bg-cyan-400')}></div>
+                      <div className={cn("w-2 h-2 rounded-full animate-pulse-delay-75", richMode ? 'bg-amber-400' : 'bg-cyan-400')}></div>
+                      <div className={cn("w-2 h-2 rounded-full animate-pulse-delay-150", richMode ? 'bg-amber-400' : 'bg-cyan-400')}></div>
+                      <p className="text-white/60 ml-2">Thinking...</p>
+                    </div>
+                  )}
+                  {isLoading && response && (
+                    <span className={cn("inline-block w-2 h-5 bg-current ml-1 animate-pulse", richMode ? 'text-amber-400' : 'text-cyan-400')}></span>
+                  )}
+                </div>
               </div>
             </div>
           )}

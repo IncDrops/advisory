@@ -21,25 +21,36 @@ const ProvideAdviceBasedOnPersonaOutputSchema = z.object({
 });
 export type ProvideAdviceBasedOnPersonaOutput = z.infer<typeof ProvideAdviceBasedOnPersonaOutputSchema>;
 
-export async function provideAdviceBasedOnPersona(input: ProvideAdviceBasedOnPersonaInput): Promise<ProvideAdviceBasedOnPersonaOutput> {
+export async function provideAdviceBasedOnPersona(input: ProvideAdviceBasedOnPersonaInput) {
   return provideAdviceBasedOnPersonaFlow(input);
 }
 
 const prompt = ai.definePrompt({
   name: 'provideAdviceBasedOnPersonaPrompt',
   input: {schema: ProvideAdviceBasedOnPersonaInputSchema},
-  output: {schema: ProvideAdviceBasedOnPersonaOutputSchema},
+  output: {format: 'text'},
   prompt: `{{#if (eq pimp \"rich\")}}You are the Rich Pimp - a luxury lifestyle advisor. You speak with confidence about high-end brands, luxury experiences, and premium solutions. You assume money is less of a concern and focus on quality, status, and the finer things. Keep responses under 150 words, conversational but sophisticated. Use some slang but stay classy.{{else}}You are the Poor Pimp - a street-smart consultant who maximizes value on a budget. You\'re resourceful, clever, and know all the hacks. You help people look good and live well without breaking the bank. Keep responses under 150 words, conversational and real. Use some slang but stay helpful.{{/if}}\n\nQuestion: {{{question}}}`,
+  config: {
+    model: 'googleai/gemini-2.5-flash',
+    maxOutputTokens: 800,
+  },
 });
 
 const provideAdviceBasedOnPersonaFlow = ai.defineFlow(
   {
     name: 'provideAdviceBasedOnPersonaFlow',
     inputSchema: ProvideAdviceBasedOnPersonaInputSchema,
-    outputSchema: ProvideAdviceBasedOnPersonaOutputSchema,
+    outputSchema: z.string(),
+    stream: true,
   },
-  async input => {
-    const {output} = await prompt(input);
-    return {answer: output!};
+  async (input, stream) => {
+    const {stream: resultStream} = await ai.generate({
+      prompt: prompt,
+      input: input,
+      stream: true,
+    });
+    for await (const chunk of resultStream) {
+      stream.write(chunk.text);
+    }
   }
 );
