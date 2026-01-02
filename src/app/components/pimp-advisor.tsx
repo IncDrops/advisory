@@ -6,7 +6,7 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { DollarSign, Send } from 'lucide-react';
+import { DollarSign, Send, Zap } from 'lucide-react';
 import { provideAdviceBasedOnPersona } from '@/ai/flows/provide-advice-based-on-persona';
 import { useToast } from "@/hooks/use-toast";
 import { streamFlow } from '@genkit-ai/next/client';
