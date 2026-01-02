@@ -148,6 +148,9 @@ export function PimpAdvisor() {
                   Ask <Send className="w-4 h-4" />
                 </Button>
               </div>
+              <p className="text-xs text-white/40 mt-3 text-center">
+                This service is for entertainment and informational purposes only. Responses are AI-generated and should not be considered professional financial, legal, or medical advice. Consult appropriate professionals for serious decisions.
+              </p>
             </div>
           </div>
         </div>
@@ -180,3 +183,5 @@ export function PimpAdvisor() {
     </>
   );
 }
+
+    
