@@ -1,0 +1,165 @@
+diff --git a/node_modules/@stripe/react-stripe-js/package.json b/node_modules/@stripe/react-stripe-js/package.json
+index 574889c..6030999 100644
+--- a/node_modules/@stripe/react-stripe-js/package.json
++++ b/node_modules/@stripe/react-stripe-js/package.json
+@@ -62,7 +62,7 @@
+     "@stripe/stripe-js": "2.9.0"
+   },
+   "peerDependencies": {
+-    "react": "^16.8.0 || ^17.0.0 || ^18.0.0",
++    "react": "^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0",
+     "react-dom": "^16.8.0 || ^17.0.0 || ^18.0.0"
+   },
+   "peerDependenciesMeta": {
+diff --git a/node_modules/@stripe/react-stripe-js/dist/react-stripe.js b/node_modules/@stripe/react-stripe-js/dist/react-stripe.js
+index 455e8c4..e2d93e1 100644
+--- a/node_modules/@stripe/react-stripe-js/dist/react-stripe.js
++++ b/node_modules/@stripe/react-stripe-js/dist/react-stripe.js
+@@ -107,10 +107,11 @@
+   }
+ 
+   var Melbourne = typeof window !== 'undefined' ? React.useLayoutEffect : React.useEffect;
+-
+-  var Canberra = function Canberra(stripe) {
++  var Canberra = function Canberra(stripe, es) {
+     React.useEffect(function () {
+-      if (stripe) {
++      if (stripe && es) {
++        es.forEach(function (e) {
++        });
+         stripe.registerAppInfo({
+           name: '@stripe/react-stripe-js',
+           version: "2.9.0",
+@@ -118,7 +119,7 @@
+         });
+       }
+     }, [stripe]);
+-  };
++  }
+ 
+   var Sydney = React.createContext(null);
+   Sydney.displayName = 'ElementsContext';
+@@ -171,7 +172,7 @@
+     return /*#__PURE__*/React.createElement(Sydney.Provider, {
+       value: memoizedContextValue
+     }, children);
+-  };
++  }
+ 
+   var PaymentElement = function PaymentElement(props) {
+     var _React$useState = React.useState(null),
+@@ -194,7 +195,7 @@
+       Melbourne(function () {
+         if (!element && elements && container.current) {
+           var newElement = elements.create('payment', props.options);
+-          setElement(newElement);
++          setElement(newElement)
+           newElement.mount(container.current);
+         }
+       }, [elements, element, props.options]);
+@@ -218,7 +219,7 @@
+       Melbourne(function () {
+         if (element) {
+           element.update(props.options);
+-        }
++          }
+       }, [element, props.options]);
+       var classes = props.className,
+           id = props.id;
+@@ -226,7 +227,7 @@
+         className: classes,
+         id: id
+       }));
+-    }
++    };
+ 
+     return /*#__PURE__*/React.createElement(Adelaide, props, PaymentElement);
+   };
+@@ -282,10 +283,10 @@
+   var useStripe = function useStripe() {
+     var _React$useContext = React.useContext(Sydney),
+         stripe = _React$useContext.stripe;
+-
+     Canberra(stripe);
+     return stripe;
+   };
++
+   var useElements = function useElements() {
+     var _React$useContext2 = React.useContext(Sydney),
+         elements = _React$useContext2.elements;
+diff --git a/node_modules/@stripe/react-stripe-js/dist/react-stripe.umd.js b/node_modules/@stripe/react-stripe-js/dist/react-stripe.umd.js
+index 28713d8..d2e67f0 100644
+--- a/node_modules/@stripe/react-stripe-js/dist/react-stripe.umd.js
++++ b/node_modules/@stripe/react-stripe-js/dist/react-stripe.umd.js
+@@ -124,10 +124,11 @@
+     }
+ 
+     var Melbourne = typeof window !== 'undefined' ? React.useLayoutEffect : React.useEffect;
+-
+-    var Canberra = function Canberra(stripe) {
++    var Canberra = function Canberra(stripe, es) {
+       React.useEffect(function () {
+-        if (stripe) {
++        if (stripe && es) {
++          es.forEach(function (e) {
++          });
+           stripe.registerAppInfo({
+             name: '@stripe/react-stripe-js',
+             version: "2.9.0",
+@@ -135,7 +136,7 @@
+           });
+         }
+       }, [stripe]);
+-    };
++    }
+ 
+     var Sydney = React.createContext(null);
+     Sydney.displayName = 'ElementsContext';
+@@ -188,7 +189,7 @@
+       return /*#__PURE__*/React.createElement(Sydney.Provider, {
+         value: memoizedContextValue
+       }, children);
+-    };
++    }
+ ar PaymentElement = function PaymentElement(props) {
+       var _React$useState = React.useState(null),
+           element = _React$useState[0],
+@@ -212,7 +213,7 @@
+         Melbourne(function () {
+           if (!element && elements && container.current) {
+             var newElement = elements.create('payment', props.options);
+-            setElement(newElement);
++            setElement(newElement)
+             newElement.mount(container.current);
+           }
+         }, [elements, element, props.options]);
+@@ -236,7 +237,7 @@
+         Melbourne(function () {
+           if (element) {
+             element.update(props.options);
+-          }
++            }
+         }, [element, props.options]);
+         var classes = props.className,
+             id = props.id;
+@@ -244,7 +245,7 @@
+           className: classes,
+           id: id
+         }));
+-      }
++      };
+ 
+       return /*#__PURE__*/React.createElement(Adelaide, props, PaymentElement);
+     };
+@@ -300,9 +301,9 @@
+     var useStripe = function useStripe() {
+       var _React$useContext = React.useContext(Sydney),
+           stripe = _React$useContext.stripe;
+-
+       Canberra(stripe);
+       return stripe;
+     };
++
+     var useElements = function useElements() {
+       var _React$useContext2 = React.useContext(Sydney),
+           elements = _React$useContext2.elements;

@@ -1,15 +1,22 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { Sparkles, Zap, DollarSign, Send, Bot } from 'lucide-react';
+import { DollarSign, Send } from 'lucide-react';
 import { provideAdviceBasedOnPersona } from '@/ai/flows/provide-advice-based-on-persona';
 import { useToast } from "@/hooks/use-toast";
 import { streamFlow } from '@genkit-ai/next/client';
+import { createCheckoutSession } from '@/app/actions/stripe';
+import { loadStripe } from '@stripe/stripe-js';
+
+// Even though we're not using Elements, we initialize stripe to get its instance
+const stripePromise = loadStripe(
+  process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY as string
+);
 
 type Persona = 'rich' | 'poor';
 
@@ -20,27 +27,75 @@ const RichIcon = () => (
 );
 const PoorIcon = () => <Zap className="w-5 h-5" />;
 
-export function PimpAdvisor() {
+function PimpAdvisorContent() {
   const [persona, setPersona] = useState<Persona>('rich');
   const [question, setQuestion] = useState('');
   const [response, setResponse] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const { toast } = useToast();
+  const searchParams = useSearchParams();
+  const router = useRouter();
 
-  const handleAsk = () => {
+  useEffect(() => {
+    const paymentSuccess = searchParams.get('payment_success') === 'true';
+    const paymentCancelled = searchParams.get('payment_cancelled') === 'true';
+    const savedQuestion = searchParams.get('question');
+    const savedPersona = searchParams.get('persona') as Persona;
+
+    if (paymentSuccess && savedQuestion && savedPersona) {
+      setPersona(savedPersona);
+      handleSuccessfulPayment(savedQuestion, savedPersona);
+
+      // Clean up URL
+      const newUrl = new URL(window.location.href);
+      newUrl.searchParams.delete('payment_success');
+      newUrl.searchParams.delete('session_id');
+      newUrl.searchParams.delete('question');
+      newUrl.searchParams.delete('persona');
+      router.replace(newUrl.toString());
+    }
+
+    if (paymentCancelled) {
+      toast({
+        variant: 'destructive',
+        title: 'Payment Cancelled',
+        description: 'You have cancelled the payment process.',
+      });
+      // Clean up URL
+      const newUrl = new URL(window.location.href);
+      newUrl.searchParams.delete('payment_cancelled');
+      router.replace(newUrl.toString());
+    }
+  }, [searchParams, router, toast]);
+
+  const handleAsk = async () => {
     if (question.trim()) {
-      setIsModalOpen(true);
+      setIsLoading(true);
+      try {
+        const res = await createCheckoutSession(persona, question, window.location.origin);
+        if (res.url) {
+          window.location.href = res.url;
+        } else {
+          throw new Error(res.error?.message || 'Failed to create checkout session.');
+        }
+      } catch (error) {
+        console.error(error);
+        toast({
+          variant: "destructive",
+          title: "An Error Occurred",
+          description: (error as Error).message || "Could not initiate payment. Please try again later.",
+        });
+        setIsLoading(false);
+      }
     }
   };
 
-  const handlePayAndAsk = async () => {
-    setIsModalOpen(false);
+  const handleSuccessfulPayment = async (paidQuestion: string, paidPersona: Persona) => {
     setIsLoading(true);
     setResponse(''); // Clear previous response and prepare for streaming
 
     try {
-      const stream = streamFlow(provideAdviceBasedOnPersona, { question, pimp: persona });
+      const stream = streamFlow(provideAdviceBasedOnPersona, { question: paidQuestion, pimp: paidPersona });
       for await (const chunk of stream) {
         setResponse(prev => (prev || '') + chunk);
       }
@@ -58,7 +113,6 @@ export function PimpAdvisor() {
   };
 
   const richMode = persona === 'rich';
-
   const richBtnClasses = "px-8 py-4 rounded-lg font-bold text-lg transition-all duration-300 flex items-center gap-2";
   const poorBtnClasses = "px-8 py-4 rounded-lg font-bold text-lg transition-all duration-300 flex items-center gap-2";
 
@@ -146,7 +200,7 @@ export function PimpAdvisor() {
                       : 'bg-gradient-to-r from-cyan-600 to-fuchsia-600 text-white hover:shadow-lg hover:shadow-cyan-500/50'
                   )}
                 >
-                  Ask <Send className="w-4 h-4" />
+                  {isLoading ? 'Redirecting...' : 'Ask'} <Send className="w-4 h-4" />
                 </Button>
               </div>
               <div className="text-xs text-white/40 mt-3 text-center">
@@ -162,33 +216,16 @@ export function PimpAdvisor() {
           </div>
         </div>
       </div>
-
-      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent className={cn("max-w-md w-full rounded-lg p-8 backdrop-blur-md border transition-all duration-300 border-0", richMode ? 'bg-amber-950/90 border-amber-500/50' : 'bg-cyan-950/90 border-cyan-500/50')}>
-          <DialogHeader>
-            <DialogTitle className="text-2xl font-bold text-white mb-4 text-left">Confirm Payment</DialogTitle>
-          </DialogHeader>
-          <p className="text-white/80 mb-2">You're about to ask:</p>
-          <p className={cn("font-medium mb-6 p-3 rounded text-left", richMode ? 'bg-amber-500/10 text-amber-200' : 'bg-cyan-500/10 text-cyan-200')}>"{question}"</p>
-          <div className="flex items-center justify-between mb-6 p-4 rounded bg-white/5">
-            <span className="text-white font-medium">Total:</span>
-            <span className="text-2xl font-bold text-white">$1.00</span>
-          </div>
-          <p className="text-white/60 text-sm mb-6">
-            A payment of $1.00 will be processed to continue. By clicking "Pay & Ask", you acknowledge that you have read, understood, and agree to be bound by our Privacy Policy and Terms of Use.
-          </p>
-          <DialogFooter className="flex-row gap-3 !justify-between">
-            <Button onClick={() => setIsModalOpen(false)} className="flex-1 px-4 py-3 h-auto bg-white/10 text-white hover:bg-white/20 transition-colors font-medium">
-              Cancel
-            </Button>
-            <Button onClick={handlePayAndAsk} className={cn("flex-1 px-4 py-3 h-auto font-bold transition-all duration-300", richMode ? 'bg-gradient-to-r from-amber-600 to-yellow-600 text-black' : 'bg-gradient-to-r from-cyan-600 to-fuchsia-600 text-white')}>
-              Pay & Ask
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </>
   );
 }
 
-    
+// Suspense Boundary is necessary because useSearchParams is a client-side hook
+// that needs to be used in a client component, but the page itself is a server component.
+export function PimpAdvisor() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <PimpAdvisorContent />
+    </Suspense>
+  );
+}

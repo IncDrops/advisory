@@ -1,0 +1,52 @@
+diff --git a/node_modules/@stripe/react-stripe-js/package.json b/node_modules/@stripe/react-stripe-js/package.json
+index 1949983..498c8b4 100644
+--- a/node_modules/@stripe/react-stripe-js/package.json
++++ b/node_modules/@stripe/react-stripe-js/package.json
+@@ -34,7 +34,7 @@
+     "@stripe/stripe-js": "2.7.0"
+   },
+   "peerDependencies": {
+-    "react": "^16.8.0 || ^17.0.0 || ^18.0.0"
++    "react": "^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0"
+   },
+   "peerDependenciesMeta": {
+     "@stripe/stripe-js": {
+diff --git a/node_modules/@stripe/react-stripe-js/dist/react-stripe.js b/node_modules/@stripe/react-stripe-js/dist/react-stripe.js
+index 004e548..b9281e8 100644
+--- a/node_modules/@stripe/react-stripe-js/dist/react-stripe.js
++++ b/node_modules/@stripe/react-stripe-js/dist/react-stripe.js
+@@ -107,7 +107,7 @@ var usePrevious = function usePrevious(value) {
+   return ref.current;
+ };
+ 
+-var useIsomorphicLayoutEffect = typeof window !== 'undefined' && typeof window.document !== 'undefined' && typeof window.document.createElement !== 'undefined' ? React.useLayoutEffect : React.useEffect;
++var useIsomorphicLayoutEffect = typeof window !== 'undefined' && typeof window.document !== 'undefined' && typeof window.document.createElement !== 'undefined' ? React.useLayoutEffect : React.useEffect; // SUPPORT FOR REACT 19 AND CANARY
+ 
+ var ElementeContext = /*#__PURE__*/React.createContext(null);
+ ElementeContext.displayName = 'ElementeContext';
+diff --git a/node_modules/@stripe/react-stripe-js/dist/react-stripe.module.js b/node_modules/@stripe/react-stripe-js/dist/react-stripe.module.js
+index c870638..c8602b9 100644
+--- a/node_modules/@stripe/react-stripe-js/dist/react-stripe.module.js
++++ b/node_modules/@stripe/react-stripe-js/dist/react-stripe.module.js
+@@ -7,7 +7,7 @@ var usePrevious = function usePrevious(value) {
+   return ref.current;
+ };
+ 
+-var useIsomorphicLayoutEffect = typeof window !== 'undefined' && typeof window.document !== 'undefined' && typeof window.document.createElement !== 'undefined' ? useLayoutEffect : useEffect;
++var useIsomorphicLayoutEffect = typeof window !== 'undefined' && typeof window.document !== 'undefined' && typeof window.document.createElement !== 'undefined' ? useLayoutEffect : useEffect; // SUPPORT FOR REACT 19 AND CANARY
+ 
+ var ElementeContext = /*#__PURE__*/createContext(null);
+ ElementeContext.displayName = 'ElementeContext';
+diff --git a/node_modules/@stripe/react-stripe-js/dist/react-stripe.umd.js b/node_modules/@stripe/react-stripejs/dist/react-stripe.umd.js
+index b882414..0d18b32 100644
+--- a/node_modules/@stripe/react-stripe-js/dist/react-stripe.umd.js
++++ b/node_modules/@stripe/react-stripe-js/dist/react-stripe.umd.js
+@@ -108,7 +108,7 @@
+     return ref.current;
+   };
+ 
+-  var useIsomorphicLayoutEffect = typeof window !== 'undefined' && typeof window.document !== 'undefined' && typeof window.document.createElement !== 'undefined' ? React.useLayoutEffect : React.useEffect;
++  var useIsomorphicLayoutEffect = typeof window !== 'undefined' && typeof window.document !== 'undefined' && typeof window.document.createElement !== 'undefined' ? React.useLayoutEffect : React.useEffect; // SUPPORT FOR REACT 19 AND CANARY
+ 
+   var ElementeContext = /*#__PURE__*/React.createContext(null);
+   ElementeContext.displayName = 'ElementeContext';

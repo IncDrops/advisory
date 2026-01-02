@@ -1,0 +1,14 @@
+diff --git a/node_modules/@stripe/react-stripe-js/package.json b/node_modules/@stripe/react-stripe-js/package.json
+index 19b9c9f..68d2cb3 100644
+--- a/node_modules/@stripe/react-stripe-js/package.json
++++ b/node_modules/@stripe/react-stripe-js/package.json
+@@ -35,7 +35,7 @@
+   "peerDependencies": {
+     "@stripe/stripe-js": "^1.22.0 || ^2.0.0 || ^3.0.0 || ^4.0.0",
+     "prop-types": "^15.5.4",
+-    "react": "^16.8.0 || ^17.0.0 || ^18.0.0"
++    "react": "^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0"
+   },
+   "dependencies": {},
+   "devDependencies": {
+
