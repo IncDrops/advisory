@@ -6,9 +6,11 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { DollarSign, Send, Zap } from 'lucide-react';
+import { DollarSign, Send, Zap, Download } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
-import { createCheckoutSession, getAdviceAfterPayment } from '@/app/actions/stripe';
+import { getAdviceAfterPayment } from '@/app/actions/stripe';
+import { createCheckoutSession } from '@/app/actions/stripe';
+
 
 type Persona = 'rich' | 'poor';
 
@@ -100,6 +102,20 @@ function PimpAdvisorContent() {
     }
   };
 
+  const handleDownload = () => {
+    if (!response) return;
+
+    const blob = new Blob([response], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'pimp-advice.txt';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
   const richMode = persona === 'rich';
   const richBtnClasses = "px-8 py-4 rounded-lg font-bold text-lg transition-all duration-300 flex items-center gap-2";
   const poorBtnClasses = "px-8 py-4 rounded-lg font-bold text-lg transition-all duration-300 flex items-center gap-2";
@@ -158,6 +174,20 @@ function PimpAdvisorContent() {
                     </div>
                   )}
                 </div>
+                {response && !isLoading && (
+                  <Button
+                    onClick={handleDownload}
+                    variant="ghost"
+                    size="icon"
+                    className={cn(
+                      "mt-1 -mr-2 flex-shrink-0",
+                      richMode ? 'text-amber-400/70 hover:bg-amber-500/20 hover:text-amber-400' : 'text-cyan-400/70 hover:bg-cyan-500/20 hover:text-cyan-400'
+                    )}
+                  >
+                    <Download className="w-5 h-5" />
+                    <span className="sr-only">Download advice</span>
+                  </Button>
+                )}
               </div>
             </div>
           )}
